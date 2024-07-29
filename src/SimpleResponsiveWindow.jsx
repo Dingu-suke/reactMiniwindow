@@ -43,6 +43,45 @@ const SimpleResponsiveWindow = ({ children, title, initialPosition, initialSize,
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const handleResize = (e, direction) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = size.width;
+    const startHeight = size.height;
+    const startLeft = position.x;
+    const startTop = position.y;
+
+    const handleMouseMove = (moveEvent) => {
+      if (direction.includes('e')) {
+        setSize(prev => ({ ...prev, width: Math.max(200, startWidth + moveEvent.clientX - startX) }));
+      }
+      if (direction.includes('s')) {
+        setSize(prev => ({ ...prev, height: Math.max(200, startHeight + moveEvent.clientY - startY) }));
+      }
+      if (direction.includes('w')) {
+        const newWidth = Math.max(200, startWidth - (moveEvent.clientX - startX));
+        setSize(prev => ({ ...prev, width: newWidth }));
+        setPosition(prev => ({ ...prev, x: startLeft + (startWidth - newWidth) }));
+      }
+      if (direction.includes('n')) {
+        const newHeight = Math.max(200, startHeight - (moveEvent.clientY - startY));
+        setSize(prev => ({ ...prev, height: newHeight }));
+        setPosition(prev => ({ ...prev, y: startTop + (startHeight - newHeight) }));
+      }
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   return (
     <div
       style={{
@@ -72,6 +111,16 @@ const SimpleResponsiveWindow = ({ children, title, initialPosition, initialSize,
       <div style={{padding: '10px', height: 'calc(100% - 40px)', overflow: 'auto'}}>
         {children}
       </div>
+
+      {/* リサイズハンドル */}
+      <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '5px', cursor: 'n-resize'}} onMouseDown={(e) => handleResize(e, 'n')} />
+      <div style={{position: 'absolute', bottom: 0, left: 0, right: 0, height: '5px', cursor: 's-resize'}} onMouseDown={(e) => handleResize(e, 's')} />
+      <div style={{position: 'absolute', top: 0, left: 0, bottom: 0, width: '5px', cursor: 'w-resize'}} onMouseDown={(e) => handleResize(e, 'w')} />
+      <div style={{position: 'absolute', top: 0, right: 0, bottom: 0, width: '5px', cursor: 'e-resize'}} onMouseDown={(e) => handleResize(e, 'e')} />
+      <div style={{position: 'absolute', top: 0, left: 0, width: '5px', height: '5px', cursor: 'nw-resize'}} onMouseDown={(e) => handleResize(e, 'nw')} />
+      <div style={{position: 'absolute', top: 0, right: 0, width: '5px', height: '5px', cursor: 'ne-resize'}} onMouseDown={(e) => handleResize(e, 'ne')} />
+      <div style={{position: 'absolute', bottom: 0, left: 0, width: '5px', height: '5px', cursor: 'sw-resize'}} onMouseDown={(e) => handleResize(e, 'sw')} />
+      <div style={{position: 'absolute', bottom: 0, right: 0, width: '5px', height: '5px', cursor: 'se-resize'}} onMouseDown={(e) => handleResize(e, 'se')} />
     </div>
   );
 };
